@@ -12,11 +12,20 @@
 #define MAIN_X_ADJ 3 //게임판 위치조정 
 #define MAIN_Y_ADJ 1 //게임판 위치조정 
 
+#define STATUS_X_ADJ MAIN_X_ADJ+MAIN_X+1 //게임정보표시 위치조정 
+
+int STATUS_Y_GOAL;
+int STATUS_Y_LEVEL;
+int STATUS_Y_SCORE;
+
 int main_org[MAIN_Y][MAIN_X]; //게임판의 정보를 저장하는 배열 모니터에 표시후에 main_cpy로 복사됨 
 int main_cpy[MAIN_Y][MAIN_X];
 
 void title(void);
 void reset(void); //게임판 초기화
+void reset_main(void);
+void reset_main_cpy(void);
+void draw_map(void);
 
 int key; //키보드로 입력받은 키값을 저장
 
@@ -97,6 +106,7 @@ void reset(void) {
 	reset_main();
 }
 
+//게임판 초기화
 void reset_main(void) {
 	int i, j;
 
@@ -116,4 +126,20 @@ void reset_main(void) {
 	for (j = 0; j < MAIN_X; j++) {
 		main_org[MAIN_Y][j] = WALL;
 	}
+}
+
+void reset_main_cpy(void) {
+	int i, j;
+
+	for (i = 0; i < MAIN_Y; i++) {
+		for (j = 0; j < MAIN_X; j++) {
+			main_cpy[i][j] = 100;
+		}
+	}
+}
+
+void draw_map(void) {
+	int y = 3;
+
+	gotoxy(STATUS_X_ADJ, STATUS_Y_LEVEL = y); printf(" LEVEL : %5d", level);
 }
