@@ -15,6 +15,9 @@
 #define P 80 //일시정지
 #define ESC 27
 
+#define false 0
+#define true 1
+
 #define ACTIVE_BLOCK -2 //저장될 블록의 상태
 #define CEILLING -1 //블록이 이동할 수 있는 공간
 #define EMPTY 0 //블록이 이동할 수 없는 공간
@@ -60,6 +63,10 @@ void draw_map(void);
 void draw_main(void);
 void new_block(void);
 void Check_Key(void);
+int check_crush(int bx, int by, int b_rotation);
+void drop_block(void);
+void move_block(int dir);
+void check_line(void);
 
 int b_type; //블록의 종류
 int b_rotation; //블록 회전
@@ -91,11 +98,14 @@ int main() {
 	title();
 	reset();
 
-	/*while (1) {
+	while (1) {
 		for (int i = 0; i < 5; i++) {
-			
+			Check_Key();
+			draw_main();
+			Sleep(speed);
+			if (crush_on && check_crush(bx, by + 1, b_rotation) == false) Sleep(100);
 		}
-	}*/
+	}
 }
 
 void title(void) {
@@ -288,8 +298,174 @@ void Check_Key(void) {
 			do { key = _getch(); } while (key == 224);
 			switch (key) {
 			case LEFT:
+				
 				break;
+			case RIGHT:
+
+				break;
+			case DOWN:
+
+				break;
+			case UP:
+
+				break;
+			case p:
+
+				break;
+			case ESC:
+				system("cls");
+				exit(0); //게임종료
 			}
 		}
+	}
+
+	while (_kbhit()) _getch();
+}
+
+int check_crush(int bx, int by, int b_rotation) {
+	int i, j;
+
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			if (blocks[b_type][b_rotation][i][j] == 1 && main_org[by + i][bx + j] > 0) return false;
+		}
+	}
+	return true;
+}
+
+void drop_block(void) {
+	int i, j;
+
+	if (crush_on && check_crush(bx, by + 1, b_rotation) == true) crush_on = 0;
+	if (crush_on && check_crush(bx, by + 1, b_rotation) == false) {
+		for (i = 0; i < MAIN_Y; i++) {
+			for (j = 0; j < MAIN_X; j++) {
+				if (main_org[i][j] == ACTIVE_BLOCK) main_org[i][j] = COMPLETE_BLOCK;
+			}
+		}
+
+		crush_on = 0;
+		check_line();
+		new_block_on = 1;
+		return;
+	}
+
+	if (check_crush(bx, by + 1, b_rotation) == true) move_block(DOWN);
+	if (check_crush(bx, by + 1, b_rotation) == false) crush_on++;
+}
+
+void move_block(int dir) {
+	int i, j;
+
+	switch (dir)
+	{
+	case LEFT:
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i][bx + j] = EMPTY;
+			}
+		}
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i][bx + j - 1] = ACTIVE_BLOCK;
+			}
+		}
+		bx--;
+		break;
+	case RIGHT:
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i][bx + j] = EMPTY;
+			}
+		}
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i][bx + j + 1] = ACTIVE_BLOCK;
+			}
+		}
+		bx++;
+		break;
+	case DOWN:
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i][bx + j] = EMPTY;
+			}
+		}
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i + 1][bx + j] = ACTIVE_BLOCK;
+			}
+		}
+		by++;
+		break;
+	case UP:
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i][bx + j] = EMPTY;
+			}
+		}
+
+		b_rotation = (b_rotation + 1) % 4;
+
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i][bx + j] = ACTIVE_BLOCK;
+			}
+		}
+		break;
+	case 100:
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i][bx + j] = EMPTY;
+			}
+		}
+		b_rotation = (b_rotation + 1) % 4;
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (blocks[b_type][b_rotation][i][j] == 1) main_org[by + i - 1][bx + j] = ACTIVE_BLOCK;
+			}
+		}
+		by--;
+		break;
+	}
+}
+
+void check_line(void) {
+	int i, j, k, l;
+
+	int block_amount; //블록갯수 저장
+	int combo = 0;
+
+	for (i = MAIN_Y - 2; i > 3;) {
+		block_amount = 0;
+		for (j = 1; j < MAIN_X - 1; j++) {
+			if (main_org[i][j] > 0) block_amount++;
+		}
+		if (block_amount == MAIN_X - 2) {
+			if (level_up_on == 0) {
+				score += 100 * level;
+				cnt++;
+				combo++;
+			}
+			for (k = i; k > 1; k--) {
+				for (l = 1; l < MAIN_X - 1; l++) {
+					if (main_org[k - 1][l] != CEILLING) main_org[k][l] = main_org[k - 1][l];
+					if (main_org[k - 1][l] == CEILLING) main_org[k][l] = EMPTY;
+				}
+			}
+		}
+		else i--;
+	}
+
+	if (combo) {
+		if (combo > 1) {
+			gotoxy(MAIN_X_ADJ + (MAIN_X / 2) - 1, MAIN_Y_ADJ + by - 2); printf("%d COMBO!", combo);
+
+			Sleep(500);
+			score += (combo * level * 100);
+			reset_main_cpy();
+		}
+		gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL); printf(" GOAL : %5d", (cnt <= 10) ? 10 - cnt : 0);
+		gotoxy(STATUS_X_ADJ, STATUS_Y_SCORE); printf("     %6d", score);
 	}
 }
