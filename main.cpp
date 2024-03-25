@@ -1,11 +1,25 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <Windows.h>
 #include <conio.h>
 #include <time.h>
 #include <stdlib.h>
 
-#define CEILLING -1
+#define LEFT 75
+#define RIGHT 77
+#define UP 72
+#define DOWN 80 //sort drop
+#define SPACE 32 //hard drop
+#define p 112 //일시정지
+#define P 80 //일시정지
+#define ESC 27
+
+#define ACTIVE_BLOCK -2 //저장될 블록의 상태
+#define CEILLING -1 //블록이 이동할 수 있는 공간
+#define EMPTY 0 //블록이 이동할 수 없는 공간
 #define WALL 1
+#define COMPLETE_BLOCK 2 //이동 완료된 블록
 
 #define MAIN_X 11 //게임판 가로크기 
 #define MAIN_Y 23 //게임판 세로크기 
@@ -26,6 +40,7 @@ void reset(void); //게임판 초기화
 void reset_main(void);
 void reset_main_cpy(void);
 void draw_map(void);
+void draw_main(void);
 
 int key; //키보드로 입력받은 키값을 저장
 
@@ -49,6 +64,13 @@ void gotoxy(int x, int y) {
 
 int main() {
 	title();
+	reset();
+
+	/*while (1) {
+		for (int i = 0; i < 5; i++) {
+			
+		}
+	}*/
 }
 
 void title(void) {
@@ -104,6 +126,7 @@ void reset(void) {
 
 	system("cls");
 	reset_main();
+	draw_map();
 }
 
 //게임판 초기화
@@ -142,4 +165,60 @@ void draw_map(void) {
 	int y = 3;
 
 	gotoxy(STATUS_X_ADJ, STATUS_Y_LEVEL = y); printf(" LEVEL : %5d", level);
+	gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL = y + 1); printf(" GOAL : %5d", 10 - cnt);
+	gotoxy(STATUS_X_ADJ, y + 2); printf("+- N E X T -+");
+	gotoxy(STATUS_X_ADJ, y + 3); printf("|           |");
+	gotoxy(STATUS_X_ADJ, y + 4); printf("|           |");
+	gotoxy(STATUS_X_ADJ, y + 5); printf("|           |");
+	gotoxy(STATUS_X_ADJ, y + 6); printf("|           |");
+	gotoxy(STATUS_X_ADJ, y + 7); printf("+-- - - - --+");
+	gotoxy(STATUS_X_ADJ, y + 8); printf(" YOUR SCORE :");
+	gotoxy(STATUS_X_ADJ, STATUS_Y_SCORE = y + 9); printf("        %6d", score);
+	gotoxy(STATUS_X_ADJ, y + 10); printf(" LAST SCORE :");
+	gotoxy(STATUS_X_ADJ, y + 11); printf("        %6d", last_score);
+	gotoxy(STATUS_X_ADJ, y + 12); printf(" BEST SCORE :");
+	gotoxy(STATUS_X_ADJ, y + 13); printf("        %6d", best_score);
+	gotoxy(STATUS_X_ADJ, y + 15); printf("  △  : Shift        SPACE : Hard Drop");
+	gotoxy(STATUS_X_ADJ, y + 16); printf("◁  ▷ : Left / Right   P   : Pause");
+	gotoxy(STATUS_X_ADJ, y + 17); printf("  ▽  : Sort Drop     ESC  : Quit");
+}
+
+void draw_main(void) {
+	int i, j;
+
+	for (j = 1; j < MAIN_X; j++) {
+		if (main_org[3][j] == EMPTY) main_org[3][j] = CEILLING;
+	}
+
+	for (i = 0; i < MAIN_Y; i++) {
+		for (j = 0; j < MAIN_X; j++) {
+			if (main_cpy[i][j] != main_org[i][j]) {
+				gotoxy(MAIN_X_ADJ + j, MAIN_Y_ADJ + i);
+
+				switch (main_org[i][j])
+				{
+				case EMPTY:
+					printf("  ");
+					break;
+				case CEILLING:
+					printf(". ");
+					break;
+				case WALL:
+					printf("▩");
+				case COMPLETE_BLOCK:
+					printf("□");
+					break;
+				case ACTIVE_BLOCK:
+					printf("■");
+					break;
+				}
+			}
+		}
+	}
+
+	for (i = 0; i < MAIN_Y; i++) {
+		for (j = 0; j < MAIN_X; j++) {
+			main_cpy[i][j] = main_org[i][j];
+		}
+	}
 }
