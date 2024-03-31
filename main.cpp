@@ -69,6 +69,7 @@ void move_block(int dir);
 void check_line(void);
 void check_level_up(void);
 void check_game_over(void);
+void pause(void);
 
 int b_type; //블록의 종류
 int b_rotation; //블록 회전
@@ -368,7 +369,7 @@ void Check_Key(void) {
 				break;
 			case p:
 			case P:
-
+				pause();
 				break;
 			case ESC:
 				system("cls");
@@ -637,6 +638,43 @@ void check_game_over(void) {
 			while (_kbhit()) _getch();
 			key = _getch();
 			reset();
+		}
+	}
+}
+
+void pause(void) {
+	int i, j;
+
+	int x = 30;
+	int y = 5;
+
+	for (i = 1; i < MAIN_X - 2; i++) {
+		gotoxy(x, y + 0); printf("▤▤▤▤▤▤▤▤▤▤▤▤▤▤▤▤▤");
+		gotoxy(x, y + 1); printf("▤                              ▤");
+		gotoxy(x, y + 2); printf("▤  +-----------------------+   ▤");
+		gotoxy(x, y + 3); printf("▤  |       P A U S E       |   ▤");
+		gotoxy(x, y + 4); printf("▤  +-----------------------+   ▤");
+		gotoxy(x, y + 5); printf("▤  Press any key to resume..   ▤");
+		gotoxy(x, y + 6); printf("▤                              ▤");
+		gotoxy(x, y + 7); printf("▤▤▤▤▤▤▤▤▤▤▤▤▤▤▤▤▤");
+	}
+	_getch();
+
+	system("cls");
+	reset_main_cpy();
+	draw_main();
+	draw_map();
+
+	for (i = 1; i < 3; i++) {
+		for (j = 0; j < 4; j++) {
+			if (blocks[b_type_next][0][i][j] == 1) {
+				gotoxy(MAIN_X + MAIN_X_ADJ + 3 + j, i + 6);
+				printf("■");
+			}
+			else {
+				gotoxy(MAIN_X + MAIN_X_ADJ + 3 + j, i + 6);
+				printf("  ");
+			}
 		}
 	}
 }
